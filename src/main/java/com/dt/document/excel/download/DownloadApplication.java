@@ -1,6 +1,5 @@
 package com.dt.document.excel.download;
 
-import com.dt.document.excel.download.config.ThreadPollExacutorConfig;
 import com.dt.document.excel.download.model.ExcelDO;
 import com.dt.document.excel.download.util.ExcelReaderUtils;
 import com.dt.document.excel.download.util.FileDownloadUtils;
@@ -14,28 +13,30 @@ import java.util.Map;
 
 /**
  * @author: lucheng
- * @data: 2021/11/2 13:34
+ * @data: 2021/11/2 15:45
  * @version: 1.0
  */
-public class Application extends Throwable{
-    /**
-     * @contextMap biaotou
-     */
-    public Map<String, Object> contextMap;
-    public String savePath;
-    public String excelPath;
-    public final FileDownloadUtils downloadUtils = new FileDownloadUtils();
-    public final ThreadPoolTaskExecutor executor;
-    public final String regEx = "[\\n`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。， 、？]";
+public class DownloadApplication {
+    private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private final String savePath;
+    private final String excelPath;
+    private final FileDownloadUtils downloadUtils;
+    private final Class T;
+    private final String regEx;
 
-    public Application(Map<String, Object> contextMap, String savePath, String excelPath, ThreadPoolTaskExecutor executor) {
-        this.contextMap = contextMap;
+    public DownloadApplication(ThreadPoolTaskExecutor threadPoolTaskExecutor,
+                               String savePath,
+                               String excelPath,
+                               FileDownloadUtils downloadUtils,
+                               Class T,
+                               String regEx) {
+        this.threadPoolTaskExecutor = threadPoolTaskExecutor;
         this.savePath = savePath;
         this.excelPath = excelPath;
-        this.executor = executor;
+        this.downloadUtils = downloadUtils;
+        this.T = T;
+        this.regEx = regEx;
     }
-
-
 
     public void run() throws Exception {
         if(!check()) {
@@ -74,7 +75,7 @@ public class Application extends Throwable{
             System.out.println(directory);
             for(String url : excelDO.getFileUrls()) {
                 String finalDirectory = directory;
-                executor.submit(() -> downloadUtils.downLoad(url, savePath+ "\\" + finalDirectory));
+                this.threadPoolTaskExecutor.submit(() -> downloadUtils.downLoad(url, savePath+ "\\" + finalDirectory));
             }
         }
     }
@@ -84,10 +85,13 @@ public class Application extends Throwable{
     }
 
     public boolean check() {
-        if (this.contextMap != null && this.savePath != null && this.excelPath != null) {
-            return true;
+        if (this.threadPoolTaskExecutor == null
+                || this.savePath == null
+                || this.excelPath == null
+                || this.downloadUtils == null) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     private boolean checkDirectory(String directory) {

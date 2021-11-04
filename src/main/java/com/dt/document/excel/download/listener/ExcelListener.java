@@ -22,7 +22,7 @@ public class ExcelListener extends AnalysisEventListener<Map<Integer, String>> {
         //integerStringMap.put(0,"1");
         list.add(integerStringMap);
         if(list.size() >= BATCH_COUNT) {
-            saveData();
+            //saveData();
             list.clear();
         }
     }

@@ -1,4 +1,5 @@
 import com.alibaba.excel.EasyExcel;
+import com.dt.document.excel.download.annotation.ExcelColumn;
 import com.dt.document.excel.download.config.ThreadPollExacutorConfig;
 import com.dt.document.excel.download.listener.ExcelListener;
 import com.dt.document.excel.download.model.ExcelDO;
@@ -15,12 +16,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.FileSystemException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -31,7 +36,6 @@ import java.util.regex.Pattern;
  * @data: 2021/7/29 16:02
  * @version: 1.0
  */
-
 
 public class MyTest {
     public static void main(String[] args) {
@@ -80,7 +84,53 @@ public class MyTest {
 //            }
 //
 //        }
+        String excelPath = "E:\\Testdocuments\\十四五大赛30.xlsx";
+        List<Map<Integer, String>> result = loadExcel(excelPath);
 
+        Class T = ExcelDO.class;
+        Field[] fields = T.getDeclaredFields();
+        Arrays.asList(fields).forEach(System.out::println);
+        int indexLen = fields.length;
+        Field field;
+        int index, fromIndex, toIndex, lastIndex = -1;
+        String type;
+        Map<String,Integer> fieldMap = new HashMap<>();
+        for(int i = 0; i < indexLen; i ++) {
+            field = fields[i];
+            if(field.isAnnotationPresent(ExcelColumn.class)) {
+                //当前field被@ExcelColumn标注
+                //获取字段索引, 如果没有定义排序，默认从上到下的顺序为表格列的顺序
+                index = field.getDeclaredAnnotation(ExcelColumn.class).index() == -1 ?
+                        lastIndex ++ : field.getDeclaredAnnotation(ExcelColumn.class).index();
+                type = field.getDeclaredAnnotation(ExcelColumn.class).type();
+                if(type.equals("value")) {
+                    //当前字段为值类型
+                    lastIndex = index == -1 ? lastIndex ++ : index;
+                    fieldMap.put(field.getName(), lastIndex);
+                    System.out.println("字段:" + field.getName() + "  type:" + type);
+                    System.out.println("index " + lastIndex);
+                }
+                else {
+                    fromIndex = field.getDeclaredAnnotation(ExcelColumn.class).fromIndex();
+                    toIndex = field.getDeclaredAnnotation(ExcelColumn.class).toIndex();
+                    lastIndex = toIndex;
+                    System.out.println(type + ":" + field.getName());
+                    System.out.println("fromIndex:" + fromIndex + "  toIndex:" + toIndex);
+                }
+            }
+        }
+//        Arrays.asList(fields).forEach(field -> {
+//            if(field.isAnnotationPresent(ExcelColumn.class)) {
+//                System.out.println(
+//                        field.getDeclaredAnnotation(ExcelColumn.class).type());
+//            }
+//
+//        });
+
+
+    }
+    private static List<Map<Integer, String>> loadExcel(String excelPath) {
+        return ExcelReaderUtils.read(excelPath);
     }
     // check directory exist
 
