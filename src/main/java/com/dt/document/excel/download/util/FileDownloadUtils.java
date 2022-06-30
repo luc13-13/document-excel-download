@@ -36,7 +36,6 @@ public class FileDownloadUtils {
                     InputStream inputStream = connection.getInputStream();
                     System.out.println("===========DownLoading:" + output.getName());
                     //byte[] data = readInputStream(inputStream);
-                    BufferedOutputStream bfos = null;
                     FileOutputStream fos = null;
                     try{
                         if(output.exists()) {
@@ -57,17 +56,16 @@ public class FileDownloadUtils {
                         //if(fos != null) {
                             fos.close();
                        // }
-
+                        Long end = System.currentTimeMillis();
+                        System.out.println("===ElapsedTime:"+((end-start)/60000)+"minutes===Done:" +filename +"!");
+                        start = null;
+                        end = null;
                     }
-
                 }
-                Long end = System.currentTimeMillis();
-                System.out.println("===ElapsedTime:"+((end-start)/60000)+"minutes===Done:" +filename +"!");
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-
         }
     }
     private void readInputStream(InputStream inputStream, FileOutputStream fos) throws IOException {

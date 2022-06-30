@@ -99,7 +99,6 @@ public class Application extends Throwable{
             } catch (Exception e) {
                 System.out.println("=============create directory failure:" + directory);
             }
-
             System.out.println("=============create directory done:" + directory);
             state = false;
         }
